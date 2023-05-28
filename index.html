@@ -15,194 +15,194 @@ vector<int> graph[MAX];<br>
 bool visited[MAX];<br>
 void dfs(int node) { <br>
     stack<int> s;<br>
-    s.push(node);
-    while (!s.empty()) { 
-        int curr_node = s.top();
-        if (!visited[curr_node]) { 
-            visited[curr_node] = true;
-            s.pop(); 
-            cout<<curr_node<<" ";
-            #pragma omp parallel for
-            for (int i = 0; i <graph[curr_node].size(); i++){ 
-                int adj_node = graph[curr_node][i]; 
-                if (!visited[adj_node]){
-                s.push(adj_node);
-                }
-            }
-        }
-    }
-}
-int main(){ 
-    int n, m, start_node; 
-    cout<<"Enter no. of Node,no. of Edges and Starting Node of graph:\n";
-    cin >> n >> m >> start_node;
-    //n: node,m:edges 
-    cout<<"Enter pair of nodeand edges:\n";
-    for (int i = 0; i < m; i++){ 
-        int u, v;
-        cin >> u >> v;
-    //u and v: Pair of edges graph[u].push_back(v);
-        graph[v].push_back(u);
-    }
-    #pragma omp parallel for 
-    for (int i= 0; i < n; i++){ 
-        visited[i] = false;
-    }
-    dfs(start_node);
-    return 0;
-}
+    s.push(node);<br>
+    while (!s.empty()) { <br>
+        int curr_node = s.top();<br>
+        if (!visited[curr_node]) { <br>
+            visited[curr_node] = true;<br>
+            s.pop(); <br>
+            cout<<curr_node<<" ";<br>
+            #pragma omp parallel for<br>
+            for (int i = 0; i <graph[curr_node].size(); i++){ <br>
+                int adj_node = graph[curr_node][i]; <br>
+                if (!visited[adj_node]){<br>
+                s.push(adj_node);<br>
+                }<br>
+            }<br>
+        }<br>
+    }<br>
+}<br>
+int main(){ <br>
+    int n, m, start_node; <br>
+    cout<<"Enter no. of Node,no. of Edges and Starting Node of graph:\n";<br>
+    cin >> n >> m >> start_node;<br>
+    //n: node,m:edges <br>
+    cout<<"Enter pair of nodeand edges:\n";<br>
+    for (int i = 0; i < m; i++){ <br>
+        int u, v;<br>
+        cin >> u >> v;<br>
+    //u and v: Pair of edges graph[u].push_back(v);<br>
+        graph[v].push_back(u);<br>
+    }<br>
+    #pragma omp parallel for <br>
+    for (int i= 0; i < n; i++){ <br>
+        visited[i] = false;<br>
+    }<br>
+    dfs(start_node);<br>
+    return 0;<br>
+}<br>
                          </p>
-BFS:
+BFS:<br>
 <p>
-#include<iostream>
-#include<stdlib.h> 
-#include<queue>
-using namespace std;
-class node { 
-    public: node *left,*right; 
-    int data;
-};
-class Breadthfs { 
-    public:node *insert(node *, int); 
-    void bfs(node*);
-};
-node *insert(node *root, int data){// inserts a node in tree
-    if(!root){
-        root=new node; 
-        root->left=NULL;
-        root->right=NULL;
-        root->data=data;
-        return root;
-    }
-    queue<node *> q;
-    q.push(root); 
-    while(!q.empty())
-    {
-        node *temp=q.front();
-        q.pop();
-        if(temp->left==NULL){
-            temp->left=new node;
-            temp->left->left=NULL;
-            temp->left->right=NULL;
-            temp->left->data=data; 
-            return root;
-        }
-        else{
-            q.push(temp->left);
-        }
-        if(temp->right==NULL){
-            temp->right=new node;
-            temp->right->left=NULL; 
-            temp->right->right=NULL; 
-            temp->right->data=data; 
-            return root;
-        }
-        else{
-            q.push(temp->right);
-        }
-    }
-}
-void bfs(node *head){
-    queue<node*> q;
-    q.push(head); int qSize;
-    while (!q.empty()){
-        qSize = q.size(); 
-        #pragma omp parallel for
-        //creates parallel threads 
-        for (int i = 0; i < qSize; i++){
-            node* currNode;
-            #pragma omp critical
-            {
-                currNode = q.front(); q.pop();
-                cout<<"\t"<<currNode->data;
-            }// prints parent node
-            #pragma omp critical
-            {
-            if(currNode->left)// push parent's left node in queue
-                q.push(currNode->left);
-            if(currNode->right)
-                q.push(currNode->right);
-            }// push parent's right node in queue
-        }
-    }
-}
-int main(){
-    node *root=NULL; 
-    int data; 
-    char ans;
-    do{
-        cout<<"\n enter data=>"; cin>>data;
-        root=insert(root,data);
-        cout<<"do you want insert one more node?";
-        cin>>ans; 
-    }
-    while(ans=='y'||ans=='Y'); 
-    bfs(root);
-    return 0;
-}
-    </p>
+#include<iostream><br>
+#include<stdlib.h> <br>
+#include<queue><br>
+using namespace std;<br>
+class node { <br>
+    public: node *left,*right; <br>
+    int data;<br>
+};<br>
+class Breadthfs { <br>
+    public:node *insert(node *, int); <br>
+    void bfs(node*);<br>
+};<br>
+node *insert(node *root, int data){// inserts a node in tree<br>
+    if(!root){<br>
+        root=new node; <br>
+        root->left=NULL;<br>
+        root->right=NULL;<br>
+        root->data=data;<br>
+        return root;<br>
+    }<br>
+    queue<node *> q;<br>
+    q.push(root); <br>
+    while(!q.empty())<br>
+    {<br>
+        node *temp=q.front();<br>
+        q.pop();<br>
+        if(temp->left==NULL){<br>
+            temp->left=new node;<br>
+            temp->left->left=NULL;<br>
+            temp->left->right=NULL;<br>
+            temp->left->data=data; <br>
+            return root;<br>
+        }<br>
+        else{<br>
+            q.push(temp->left);<br>
+        }<br>
+        if(temp->right==NULL){<br>
+            temp->right=new node;<br>
+            temp->right->left=NULL;<br> 
+            temp->right->right=NULL; <br>
+            temp->right->data=data; <br>
+            return root;<br>
+        }<br>
+        else{<br>
+            q.push(temp->right);<br>
+        }<br>
+    }<br>
+}<br>
+void bfs(node *head){<br>
+    queue<node*> q;<br>
+    q.push(head); int qSize;<br>
+    while (!q.empty()){<br>
+        qSize = q.size(); <br>
+        #pragma omp parallel for<br>
+        //creates parallel threads <br>
+        for (int i = 0; i < qSize; i++){<br>
+            node* currNode;<br>
+            #pragma omp critical<br>
+            {<br>
+                currNode = q.front(); q.pop();<br>
+                cout<<"\t"<<currNode->data;<br>
+            }// prints parent node<br>
+            #pragma omp critical<br>
+            {<br>
+            if(currNode->left)// push parent's left node in queue<br>
+                q.push(currNode->left);<br>
+            if(currNode->right)<br>
+                q.push(currNode->right);<br>
+            }// push parent's right node in queue<br>
+        }<br>
+    }<br>
+}<br>
+int main(){<br>
+    node *root=NULL; <br>
+    int data; <br>
+    char ans;<br>
+    do{<br>
+        cout<<"\n enter data=>"; cin>>data;<br>
+        root=insert(root,data);<br>
+        cout<<"do you want insert one more node?";<br>
+        cin>>ans; <br>
+    }<br>
+    while(ans=='y'||ans=='Y'); <br>
+    bfs(root);<br>
+    return 0;<br>
+}<br>
+    </p><br>
 
 
 
 
-Min, max, sum, avg
-<p>#include <iostream>
-#include <vector>
-#include <omp.h> 
-#include <climits> 
-using namespace std;
-void min_reduction(vector<int>& arr) {
-    int min_value = INT_MAX;
-    #pragma omp parallel for reduction(min: min_value) 
-    for (int i= 0; i < arr.size(); i++) { 
-        if (arr[i] < min_value) {
-            min_value = arr[i];
-        }
+Min, max, sum, avg<br>
+<p>#include <iostream><br>
+#include <vector><br>
+#include <omp.h> <br>
+#include <climits> <br>
+using namespace std;<br>
+void min_reduction(vector<int>& arr) {<br>
+    int min_value = INT_MAX;<br>
+    #pragma omp parallel for reduction(min: min_value) <br>
+    for (int i= 0; i < arr.size(); i++) { <br>
+        if (arr[i] < min_value) {<br>
+            min_value = arr[i];<br>
+        }<br>
+    }<br>
+    cout << "Minimum value: " << min_value << endl;<br>
+}<br>
+void max_reduction(vector<int>& arr) {<br>
+    int max_value = INT_MIN;<br>
+    #pragma omp parallel for reduction(max: max_value) <br>
+    for (int i= 0; i < arr.size(); i++) { <br>
+        if (arr[i] > max_value) {<br>
+            max_value = arr[i];<br>
+        }<br>
+    }<br>
+    cout << "Maximum value: " << max_value << endl;<br>
+}<br>
+void sum_reduction(vector<int>& arr) {<br>
+    int sum = 0;<br>
+    #pragma omp parallel for reduction(+: sum) <br>
+    for (int i= 0; i < arr.size(); i++) { <br>
+        sum+= arr[i];<br>
     }
-    cout << "Minimum value: " << min_value << endl;
-}
-void max_reduction(vector<int>& arr) {
-    int max_value = INT_MIN;
-    #pragma omp parallel for reduction(max: max_value) 
-    for (int i= 0; i < arr.size(); i++) { 
-        if (arr[i] > max_value) {
-            max_value = arr[i];
-        }
+    cout << "Sum: " << sum << endl;<br>
+}<br>
+void average_reduction(vector<int>& arr) { <br>
+    int sum= 0;<br>
+    #pragma omp parallel for reduction(+: sum) <br>
+    for (int i= 0; i < arr.size(); i++) { <br>
+        sum+= arr[i];<br>
     }
-    cout << "Maximum value: " << max_value << endl;
-}
-void sum_reduction(vector<int>& arr) {
-    int sum = 0;
-    #pragma omp parallel for reduction(+: sum) 
-    for (int i= 0; i < arr.size(); i++) { 
-        sum+= arr[i];
-    }
-    cout << "Sum: " << sum << endl;
-}
-void average_reduction(vector<int>& arr) { 
-    int sum= 0;
-    #pragma omp parallel for reduction(+: sum) 
-    for (int i= 0; i < arr.size(); i++) { 
-        sum+= arr[i];
-    }
-    cout << "Average: " << (double)sum / arr.size() << endl;
-}
-int main() {
-    vector<int> arr; 
-    arr.push_back(5); 
-    arr.push_back(2); 
-    arr.push_back(9); 
-    arr.push_back(1); 
-    arr.push_back(7); 
-    arr.push_back(6); 
-    arr.push_back(8); 
-    arr.push_back(3); 
-    arr.push_back(4);
-    min_reduction(arr); 
-    max_reduction(arr);
-    sum_reduction(arr); 
-    average_reduction(arr);
-}
+    cout << "Average: " << (double)sum / arr.size() << endl;<br>
+}<br>
+int main() {<br>
+    vector<int> arr; <br>
+    arr.push_back(5); <br>
+    arr.push_back(2); <br>
+    arr.push_back(9); <br>
+    arr.push_back(1); <br>
+    arr.push_back(7); <br>
+    arr.push_back(6); <br>
+    arr.push_back(8); <br>
+    arr.push_back(3); <br>
+    arr.push_back(4);<br>
+    min_reduction(arr); <br>
+    max_reduction(arr);<br>
+    sum_reduction(arr); <br>
+    average_reduction(arr);<br><br>
+}<br>
 
 
 </p
