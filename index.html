@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+DFS:
+#include <iostream>
+#include <vector>
+#include <stack> 
+#include <omp.h> 
+using namespace std;
+const int MAX = 100000;
+vector<int> graph[MAX];
+bool visited[MAX];
+void dfs(int node) { 
+    stack<int> s;
+    s.push(node);
+    while (!s.empty()) { 
+        int curr_node = s.top();
+        if (!visited[curr_node]) { 
+            visited[curr_node] = true;
+            s.pop(); 
+            cout<<curr_node<<" ";
+            #pragma omp parallel for
+            for (int i = 0; i <graph[curr_node].size(); i++){ 
+                int adj_node = graph[curr_node][i]; 
+                if (!visited[adj_node]){
+                s.push(adj_node);
+                }
+            }
+        }
+    }
+}
+int main(){ 
+    int n, m, start_node; 
+    cout<<"Enter no. of Node,no. of Edges and Starting Node of graph:\n";
+    cin >> n >> m >> start_node;
+    //n: node,m:edges 
+    cout<<"Enter pair of nodeand edges:\n";
+    for (int i = 0; i < m; i++){ 
+        int u, v;
+        cin >> u >> v;
+    //u and v: Pair of edges graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    #pragma omp parallel for 
+    for (int i= 0; i < n; i++){ 
+        visited[i] = false;
+    }
+    dfs(start_node);
+    return 0;
+}
+
+BFS:
+#include<iostream>
+#include<stdlib.h> 
+#include<queue>
+using namespace std;
+class node { 
+    public: node *left,*right; 
+    int data;
+};
+class Breadthfs { 
+    public:node *insert(node *, int); 
+    void bfs(node*);
+};
+node *insert(node *root, int data){// inserts a node in tree
+    if(!root){
+        root=new node; 
+        root->left=NULL;
+        root->right=NULL;
+        root->data=data;
+        return root;
+    }
+    queue<node *> q;
+    q.push(root); 
+    while(!q.empty())
+    {
+        node *temp=q.front();
+        q.pop();
+        if(temp->left==NULL){
+            temp->left=new node;
+            temp->left->left=NULL;
+            temp->left->right=NULL;
+            temp->left->data=data; 
+            return root;
+        }
+        else{
+            q.push(temp->left);
+        }
+        if(temp->right==NULL){
+            temp->right=new node;
+            temp->right->left=NULL; 
+            temp->right->right=NULL; 
+            temp->right->data=data; 
+            return root;
+        }
+        else{
+            q.push(temp->right);
+        }
+    }
+}
+void bfs(node *head){
+    queue<node*> q;
+    q.push(head); int qSize;
+    while (!q.empty()){
+        qSize = q.size(); 
+        #pragma omp parallel for
+        //creates parallel threads 
+        for (int i = 0; i < qSize; i++){
+            node* currNode;
+            #pragma omp critical
+            {
+                currNode = q.front(); q.pop();
+                cout<<"\t"<<currNode->data;
+            }// prints parent node
+            #pragma omp critical
+            {
+            if(currNode->left)// push parent's left node in queue
+                q.push(currNode->left);
+            if(currNode->right)
+                q.push(currNode->right);
+            }// push parent's right node in queue
+        }
+    }
+}
+int main(){
+    node *root=NULL; 
+    int data; 
+    char ans;
+    do{
+        cout<<"\n enter data=>"; cin>>data;
+        root=insert(root,data);
+        cout<<"do you want insert one more node?";
+        cin>>ans; 
+    }
+    while(ans=='y'||ans=='Y'); 
+    bfs(root);
+    return 0;
+}
+
+
+
+
+
+Min, max, sum, avg
+#include <iostream>
+#include <vector>
+#include <omp.h> 
+#include <climits> 
+using namespace std;
+void min_reduction(vector<int>& arr) {
+    int min_value = INT_MAX;
+    #pragma omp parallel for reduction(min: min_value) 
+    for (int i= 0; i < arr.size(); i++) { 
+        if (arr[i] < min_value) {
+            min_value = arr[i];
+        }
+    }
+    cout << "Minimum value: " << min_value << endl;
+}
+void max_reduction(vector<int>& arr) {
+    int max_value = INT_MIN;
+    #pragma omp parallel for reduction(max: max_value) 
+    for (int i= 0; i < arr.size(); i++) { 
+        if (arr[i] > max_value) {
+            max_value = arr[i];
+        }
+    }
+    cout << "Maximum value: " << max_value << endl;
+}
+void sum_reduction(vector<int>& arr) {
+    int sum = 0;
+    #pragma omp parallel for reduction(+: sum) 
+    for (int i= 0; i < arr.size(); i++) { 
+        sum+= arr[i];
+    }
+    cout << "Sum: " << sum << endl;
+}
+void average_reduction(vector<int>& arr) { 
+    int sum= 0;
+    #pragma omp parallel for reduction(+: sum) 
+    for (int i= 0; i < arr.size(); i++) { 
+        sum+= arr[i];
+    }
+    cout << "Average: " << (double)sum / arr.size() << endl;
+}
+int main() {
+    vector<int> arr; 
+    arr.push_back(5); 
+    arr.push_back(2); 
+    arr.push_back(9); 
+    arr.push_back(1); 
+    arr.push_back(7); 
+    arr.push_back(6); 
+    arr.push_back(8); 
+    arr.push_back(3); 
+    arr.push_back(4);
+    min_reduction(arr); 
+    max_reduction(arr);
+    sum_reduction(arr); 
+    average_reduction(arr);
+}
+
+
+
+
+
+
+
+
+
+
+Boston
+import tensorflow as tf
+from tensorflow.keras.datasets import boston_housing
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+
+(x_train, y_train), (x_test, y_test) = boston_housing.load_data()
+
+# Normalize the features
+mean = x_train.mean(axis=0)
+std = x_train.std(axis=0)
+x_train = (x_train - mean) / std
+x_test = (x_test - mean) / std
+
+#x_test[5] // input for prediction
+#y_test[5] // actual value
+
+model = Sequential()
+model.add(Dense(128,activation='relu',input_shape = (x_train[0].shape)))
+model.add(Dense(64,activation='relu'))
+model.add(Dense(32,activation='relu'))
+model.add(Dense(1))
+
+model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
+
+model.fit(x_train, y_train, batch_size=32, epochs=100, verbose=1, validation_data=(x_test,y_test))
+
+loss = model.evaluate(x_test, y_test, verbose=0)
+print(f"Mean Squared Error (MSE): {loss:.2f}")
+
+test_input = [[-0.3754937 , -0.48361547, -0.20791668, -0.25683275,  0.23597582,-0.48113631, -0.94641237, -0.67000565, -0.39603557, -0.08965908, 0.32944629,  0.44807713,  0.11720047]]
+predicted_value = model.predict(test_input)
+print("actual value is :",y_test[4])
+print("predicted value is : ",predicted_value)
+
+Letter Recognition
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import RMSprop
+from tensorflow.keras.datasets import mnist
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
+from sklearn import metrics
+# Load the ocr dataset
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+print("X_train shape", x_train.shape)
+print("y_train shape", y_train.shape)
+print("X_test shape", x_test.shape)
+print("y_test shape", y_test.shape)
+# Reshape the dataset as it is 3 dimensional
+x_train = x_train.reshape(60000, 784)
+x_test = x_test.reshape(10000, 784)
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255 # Each image has Intensity from 0 to 255
+x_test /= 255
+num_classes = 10
+y_train = np.eye(num_classes)[y_train]
+y_test = np.eye(num_classes)[y_test]
+# Build the model
+import tensorflow as tf
+model = Sequential()
+model.add(Dense(512, activation='relu', input_shape=(784,)))
+model.add(Dropout(0.2))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(num_classes, activation='softmax'))
+# Compile the model
+model.compile(loss='categorical_crossentropy',optimizer=RMSprop(),metrics=['accuracy'
+])
+# Train the model
+batch_size = 128
+epochs = 20
+history = model.fit(x_train,
+y_train,batch_size=batch_size,epochs=epochs,verbose=1,validation_data=(x_test,
+y_test))
+# Evaluate the model
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+
+Fashion
+import tensorflow as tf
+from tensorflow import keras
+import numpy as np
+import matplotlib.pyplot as plt
+# Load the MNIST Fashion dataset
+fashion_mnist = keras.datasets.fashion_mnist
+(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
+# Define class names for the fashion categories
+class_names = [
+'T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot'
+]
+# Preprocess the data
+train_images = train_images / 255.0
+test_images = test_images / 255.0
+# Display some sample images
+plt.figure(figsize=(10, 10))
+for i in range(25):
+    plt.subplot(5, 5, i + 1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(train_images[i], cmap=plt.cm.binary)
+    plt.xlabel(class_names[train_labels[i]])
+    plt.show()
+# Build the model
+model = keras.Sequential([
+keras.layers.Flatten(input_shape=(28, 28)),
+keras.layers.Dense(128, activation='relu'),
+keras.layers.Dense(10, activation='softmax')
+])
+# Compile the model
+model.compile(optimizer='adam',loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),metrics=['accuracy'])
+# Train the model
+model.fit(train_images, train_labels, epochs=10)
+# Evaluate the model
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+print('\nTest accuracy:', test_acc)
+# Make predictions
+predictions = model.predict(test_images)
+</body>
+</html>
+
